@@ -52,30 +52,30 @@ jobs:
             gh_owner = "${{ github.repository_owner }}"
             gh_repo_name = "${{ github.event.repository.name }}"
 
-  # environments:
-  #   needs: core
-  #   name: Plan environments changes
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       environment:
-  #         - dev
-  #         - staging
-  #         - prod
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+  environments:
+    needs: core
+    name: Plan environments changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment:
+          - dev
+          - staging
+          - prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Create tofu plan for ${{ matrix.environment }}
-  #       uses: dflook/tofu-plan@v2.1.0
-  #       with:
-  #         path: ./infrastructure/envs/${{ matrix.environment }}
-  #         label: ${{ matrix.environment }}
-  #         backend_config: |
-  #           access_key=${{ secrets.SCW_ACCESS_KEY }}
-  #           secret_key=${{ secrets.SCW_SECRET_KEY }}
-  #           bucket=${{ github.event.repository.name }}-tofu-state
-  #         variables: |
-  #           gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
-  #           gh_owner = "${{ github.repository_owner }}"
-  #           gh_repo_name = "${{ github.event.repository.name }}"
+      - name: Create tofu plan for ${{ matrix.environment }}
+        uses: dflook/tofu-plan@v2.1.0
+        with:
+          path: ./infrastructure/envs/${{ matrix.environment }}
+          label: ${{ matrix.environment }}
+          backend_config: |
+            access_key=${{ secrets.SCW_ACCESS_KEY }}
+            secret_key=${{ secrets.SCW_SECRET_KEY }}
+            bucket=${{ github.event.repository.name }}-tofu-state
+          variables: |
+            gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
+            gh_owner = "${{ github.repository_owner }}"
+            gh_repo_name = "${{ github.event.repository.name }}"
