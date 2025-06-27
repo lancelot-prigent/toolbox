@@ -40,8 +40,8 @@ jobs:
           backend_config: |
             access_key=${{ secrets.SCW_ACCESS_KEY }}
             secret_key=${{ secrets.SCW_SECRET_KEY }}
-            bucket=${{ github.event.repository.name }}-tofu-state
+            bucket=toolbox-tofu-state
           variables: |
             gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
-            gh_owner = "${{ github.event.repository.owner }}"
-            gh_repo_name = "${{ github.event.repository.name }}"
+            gh_owner = "lancelot-prigent"
+            gh_repo_name = "toolbox"
