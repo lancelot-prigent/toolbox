@@ -42,9 +42,3 @@ jobs:
             gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
             gh_owner = "${{ github.event.repository.owner }}"
             gh_repo_name = "${{ github.event.repository.name }}"
-
-      - name: Flag pull request
-        uses: actions-ecosystem/action-add-labels@v1
-        if: steps.plan.outputs.changes == true
-        with:
-          labels: "infrastructure"
