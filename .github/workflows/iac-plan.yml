@@ -51,7 +51,6 @@ jobs:
           - prod
     steps:
       - name: Checkout code
-        if: false # TODO: remove this
         uses: actions/checkout@v4
 
       - name: Create tofu plan for ${{ matrix.environment }}
