@@ -14,13 +14,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Scaleway CLI
-        uses: scaleway/action-scw@v0
-        with:
-          save-config: true
-          access-key: ${{ secrets.SCW_ACCESS_KEY }}
-          secret-key: ${{ secrets.SCW_SECRET_KEY }}
-          default-organization-id: ${{ secrets.SCW_ORGANIZATION_ID }}
+      # - name: Install Scaleway CLI
+      #   uses: scaleway/action-scw@v0
+      #   with:
+      #     save-config: true
+      #     access-key: ${{ secrets.SCW_ACCESS_KEY }}
+      #     secret-key: ${{ secrets.SCW_SECRET_KEY }}
+      #     default-organization-id: ${{ secrets.SCW_ORGANIZATION_ID }}
 
       - name: Open Tofu Plan Core
         uses: dflook/tofu-plan@v2.1.0
@@ -28,8 +28,8 @@ jobs:
           path: ./infrastructure/core
           label: Core
           backend_config: |
-            access_key="${{ secrets.SCW_ACCESS_KEY }}"
-            secret_key="${{ secrets.SCW_SECRET_KEY }}"
+            access_key=${{ secrets.SCW_ACCESS_KEY }}
+            secret_key=${{ secrets.SCW_SECRET_KEY }}
           # variables: |
           #   github_access_token = "${{ secrets.GH_PAT_TOKEN }}"
           #   cloudflare_token = "${{ secrets.CF_API_TOKEN }}"
