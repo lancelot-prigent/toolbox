@@ -5,10 +5,9 @@ provider "github" {
   owner = var.gh_owner
 }
 
+module "environment" {
+  source = "../../modules/environment"
 
-module "github_env" {
-  source = "../github_env"
-
-  env_name     = var.env_name
+  env_name     = "pr-${var.pr_number}"
   gh_repo_name = var.gh_repo_name
 }
