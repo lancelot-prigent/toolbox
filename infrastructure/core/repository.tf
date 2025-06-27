@@ -3,7 +3,7 @@ resource "github_repository" "this" {
     prevent_destroy = true
   }
 
-  name                 = "toolbox"
+  name                 = var.gh_repo_name
   is_template          = false
   description          = "A monorepo template with NestJS, React, React Native, and more. Powered by Nx."
   visibility           = "public"
