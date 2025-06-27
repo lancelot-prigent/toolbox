@@ -7,6 +7,10 @@ on:
     paths:
       - 'infrastructure/**'
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -14,16 +18,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # - name: Install Scaleway CLI
-      #   uses: scaleway/action-scw@v0
-      #   with:
-      #     save-config: true
-      #     access-key: ${{ secrets.SCW_ACCESS_KEY }}
-      #     secret-key: ${{ secrets.SCW_SECRET_KEY }}
-      #     default-organization-id: ${{ secrets.SCW_ORGANIZATION_ID }}
+      - name: Install Scaleway CLI
+        uses: scaleway/action-scw@v0
+        with:
+          save-config: true
+          access-key: ${{ secrets.SCW_ACCESS_KEY }}
+          secret-key: ${{ secrets.SCW_SECRET_KEY }}
+          default-organization-id: ${{ secrets.SCW_ORGANIZATION_ID }}
 
-      - name: Open Tofu Plan Core
+      - name: Create tofu plan for core
         uses: dflook/tofu-plan@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           path: ./infrastructure/core
           label: Core
