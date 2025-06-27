@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'infrastructure/**'
+      - "infrastructure/**"
 
 permissions:
   contents: read
@@ -36,8 +36,9 @@ jobs:
           backend_config: |
             access_key=${{ secrets.SCW_ACCESS_KEY }}
             secret_key=${{ secrets.SCW_SECRET_KEY }}
-          # variables: |
-          #   github_access_token = "${{ secrets.GH_PAT_TOKEN }}"
+          variables: |
+            gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
+            gh_owner = "${{ github.repository_owner }}"
           #   cloudflare_token = "${{ secrets.CF_API_TOKEN }}"
           #   cloudflare_zone_id = "${{ vars.CF_ZONE_ID }}"
           #   cloudflare_account_id = "${{ vars.CF_ACCOUNT_ID }}"
