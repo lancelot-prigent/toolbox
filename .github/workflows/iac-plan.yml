@@ -26,6 +26,12 @@ jobs:
           secret-key: ${{ secrets.SCW_SECRET_KEY }}
           default-organization-id: ${{ secrets.SCW_ORGANIZATION_ID }}
 
+      - name: Debug env
+        run: |
+          echo "github.event.repository.name: ${{ github.event.repository.name }}"
+          echo "github.event.repository.owner: ${{ github.event.repository.owner }}"
+          echo "github.event.repository: ${{ github.event.repository }}"
+
       - name: Create tofu plan for core
         id: plan
         uses: dflook/tofu-plan@v2.1.0
@@ -40,8 +46,8 @@ jobs:
           backend_config: |
             access_key=${{ secrets.SCW_ACCESS_KEY }}
             secret_key=${{ secrets.SCW_SECRET_KEY }}
-            bucket=toolbox-tofu-state
+            bucket=${{ github.event.repository.name }}-tofu-state
           variables: |
             gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
-            gh_owner = "lancelot-prigent"
-            gh_repo_name = "toolbox"
+            gh_owner = "${{ github.event.repository.owner }}"
+            gh_repo_name = "${{ github.event.repository.name }}"
