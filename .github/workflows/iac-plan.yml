@@ -26,10 +26,6 @@ jobs:
           secret-key: ${{ secrets.SCW_SECRET_KEY }}
           default-organization-id: ${{ secrets.SCW_ORGANIZATION_ID }}
 
-      - name: Debug env
-        run: |
-          echo "github.event.repository: ${{ toJson(github.event.repository) }}"
-
       - name: Create tofu plan for core
         id: plan
         uses: dflook/tofu-plan@v2.1.0
@@ -48,4 +44,4 @@ jobs:
           variables: |
             gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
             gh_owner = "${{ github.repository_owner }}"
-            gh_repo_name = "toolbox"
+            gh_repo_name = "${{ github.event.repository.name }}"
