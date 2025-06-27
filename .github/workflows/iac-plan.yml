@@ -26,14 +26,14 @@ jobs:
           secret-key: ${{ secrets.SCW_SECRET_KEY }}
           default-organization-id: ${{ secrets.SCW_ORGANIZATION_ID }}
 
-      - name: Debug env
-        run: env
-
       - name: Create tofu plan for core
         id: plan
         uses: dflook/tofu-plan@v2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
         with:
           path: ./infrastructure/core
           label: Core
