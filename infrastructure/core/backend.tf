@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket                      = "tbox-terraform-state"
+    bucket                      = ""
     key                         = "core.tfstate"
     region                      = "fr-par"
     endpoint                    = "https://s3.fr-par.scw.cloud"
