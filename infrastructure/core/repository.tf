@@ -82,3 +82,10 @@ resource "github_repository_ruleset" "default_branch" {
     # }
   }
 }
+
+resource "github_issue_label" "infrastructure" {
+  repository  = github_repository.this.name
+  name        = "infrastructure"
+  color       = "FFDA18"
+  description = "Changes to the infrastructure"
+}

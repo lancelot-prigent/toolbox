@@ -27,6 +27,7 @@ jobs:
           default-organization-id: ${{ secrets.SCW_ORGANIZATION_ID }}
 
       - name: Create tofu plan for core
+        id: plan
         uses: dflook/tofu-plan@v2.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,3 +42,9 @@ jobs:
             gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
             gh_owner = "${{ github.event.repository.owner }}"
             gh_repo_name = "${{ github.event.repository.name }}"
+
+      - name: Flag pull request
+        uses: actions-ecosystem/action-add-labels@v1
+        if: steps.plan.outputs.changes == true
+        with:
+          labels: "infrastructure"
