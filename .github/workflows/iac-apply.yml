@@ -1,7 +1,7 @@
-name: Tofu - Plan
+name: Tofu - Apply
 
 on:
-  pull_request:
+  push:
     branches:
       - main
     paths:
@@ -19,14 +19,14 @@ env:
 
 jobs:
   core:
-    name: Plan core changes
+    name: Apply core changes
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create tofu plan for core
-        uses: dflook/tofu-plan@v2.1.0
+      - name: Apply core changes
+        uses: dflook/tofu-apply@v2.1.0
         with:
           path: ./infrastructure/core
           label: Core
@@ -41,7 +41,7 @@ jobs:
 
   # environments:
   #   needs: core
-  #   name: Plan environments changes
+  #   name: Apply environments changes
   #   runs-on: ubuntu-latest
   #   strategy:
   #     matrix:
@@ -53,8 +53,8 @@ jobs:
   #     - name: Checkout code
   #       uses: actions/checkout@v4
 
-  #     - name: Create tofu plan for ${{ matrix.environment }}
-  #       uses: dflook/tofu-plan@v2.1.0
+  #     - name: Apply ${{ matrix.environment }} changes
+  #       uses: dflook/tofu-apply@v2.1.0
   #       with:
   #         path: ./infrastructure/envs/${{ matrix.environment }}
   #         label: ${{ matrix.environment }}
