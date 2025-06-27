@@ -40,6 +40,3 @@ jobs:
             gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
             gh_owner = "${{ github.event.repository.owner }}"
             gh_repo_name = "${{ github.event.repository.name }}"
-          #   cloudflare_token = "${{ secrets.CF_API_TOKEN }}"
-          #   cloudflare_zone_id = "${{ vars.CF_ZONE_ID }}"
-          #   cloudflare_account_id = "${{ vars.CF_ACCOUNT_ID }}"
