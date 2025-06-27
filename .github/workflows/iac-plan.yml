@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "infrastructure/**"
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
