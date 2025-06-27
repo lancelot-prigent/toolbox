@@ -5,7 +5,7 @@ resource "github_repository" "this" {
 
   name                 = var.gh_repo_name
   is_template          = true
-  description          = "A monorepo template with NestJS, React, React Native, and more. Powered by Nx."
+  description          = "A monorepo template with NestJS, React, React Native, OpenTofu and more. Powered by Nx."
   visibility           = "public"
   vulnerability_alerts = true
 
@@ -16,6 +16,8 @@ resource "github_repository" "this" {
     # "react-native",
     "tailwindcss",
     "typescript",
+    "open-tofu",
+    "scaleway"
   ]
 
   allow_merge_commit = false
