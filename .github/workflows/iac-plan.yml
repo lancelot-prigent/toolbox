@@ -28,8 +28,8 @@ jobs:
           path: ./infrastructure/core
           label: Core
           backend_config: |
-            access_key = ${{ secrets.SCW_ACCESS_KEY }}
-            secret_key = ${{ secrets.SCW_SECRET_KEY }}
+            access_key="${{ secrets.SCW_ACCESS_KEY }}"
+            secret_key="${{ secrets.SCW_SECRET_KEY }}"
           # variables: |
           #   github_access_token = "${{ secrets.GH_PAT_TOKEN }}"
           #   cloudflare_token = "${{ secrets.CF_API_TOKEN }}"
