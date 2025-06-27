@@ -1,0 +1,37 @@
+name: Infrastructure as Code - Plan
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/**'
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Scaleway CLI
+        uses: scaleway/action-scw@v0
+        with:
+          save-config: true
+          access-key: ${{ secrets.SCW_ACCESS_KEY }}
+          secret-key: ${{ secrets.SCW_SECRET_KEY }}
+          default-organization-id: ${{ secrets.SCW_ORGANIZATION_ID }}
+
+      - name: Open Tofu Plan Core
+        uses: dflook/tofu-plan@v2.1.0
+        with:
+          path: ./infrastructure/core
+          label: Core
+          backend_config: |
+            access_key = ${{ secrets.SCW_ACCESS_KEY }}
+            secret_key = ${{ secrets.SCW_SECRET_KEY }}
+          # variables: |
+          #   github_access_token = "${{ secrets.GH_PAT_TOKEN }}"
+          #   cloudflare_token = "${{ secrets.CF_API_TOKEN }}"
+          #   cloudflare_zone_id = "${{ vars.CF_ZONE_ID }}"
+          #   cloudflare_account_id = "${{ vars.CF_ACCOUNT_ID }}"
