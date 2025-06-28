@@ -57,7 +57,7 @@ jobs:
         with:
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
-          app-id: ${{ vars.TOFU_MANAGER_APP_ID }}
+          app-id: ${{ vars.TOFU_MANAGER_CLIENT_ID }}
           private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
 
       - name: Apply Tofu plan
@@ -127,7 +127,7 @@ jobs:
         with:
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
-          app-id: ${{ vars.TOFU_MANAGER_APP_ID }}
+          app-id: ${{ vars.TOFU_MANAGER_CLIENT_ID }}
           private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
 
       - name: Destroy Tofu plan
