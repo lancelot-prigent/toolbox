@@ -56,6 +56,12 @@ jobs:
               deploy: 'deploying'
             });
 
+      - name: Debug
+        run: |
+          echo "gh_owner: ${{ github.repository_owner }}"
+          echo "gh_repo_name: ${{ github.event.repository.name }}"
+          echo "pr_number: ${{ github.event.pull_request.number }}"
+
       - name: Apply Tofu plan
         uses: dflook/tofu-apply@v2.1.0
         with:
@@ -114,7 +120,7 @@ jobs:
               deploy: 'destroying'
             });
 
-      - name: Apply Tofu plan
+      - name: Destroy Tofu plan
         if: fromJSON(needs.determine-actions.outputs.should-apply)
         uses: dflook/tofu-destroy@v2.1.0
         with:
