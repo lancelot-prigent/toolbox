@@ -1,4 +1,4 @@
-name: Preview - Deploy
+name: Pull Request
 
 on:
   pull_request:
@@ -10,7 +10,44 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  lint-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 10.12.2
+          run_install: false
+
+      # This enables task distribution via Nx Cloud
+      # Run this command as early as possible, before dependencies are installed
+      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
+      # Uncomment this line to enable task distribution
+      # - run: pnpm dlx nx-cloud start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
+
+      # Cache node_modules
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+      - uses: nrwl/nx-set-shas@v4
+
+      - run: pnpm sherif
+
+      # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
+      # - run: pnpm exec nx-cloud record -- echo Hello World
+      # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
+      - run: pnpm exec nx affected -t lint test build
+
   determine-actions:
+    needs: lint-test-build
     name: Determine actions
     runs-on: ubuntu-latest
     outputs:
@@ -67,12 +104,10 @@ jobs:
 
       - name: Apply Tofu plan
         uses: dflook/tofu-apply@v2.1.0
+        id: apply
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_OWNER: ${{ github.repository_owner }}
-          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
         with:
           path: ./infrastructure/envs/preview
           label: preview
@@ -85,6 +120,9 @@ jobs:
           variables: |
             gh_repo_name = "${{ github.event.repository.name }}"
             pr_number = "${{ github.event.pull_request.number }}"
+            scw_access_key = "${{ secrets.SCW_ACCESS_KEY }}"
+            scw_secret_key = "${{ secrets.SCW_SECRET_KEY }}"
+            scw_organization_id = "${{ secrets.SCW_ORGANIZATION_ID }}"
 
       - name: Deploy application
         run: |
@@ -96,7 +134,8 @@ jobs:
           script: |
             const scripts = require('./.github/scripts/report-state.js');
             await scripts({ github, context, core }, {
-              deploy: 'deployed'
+              deploy: 'deployed',
+              api_container_endpoint: ${{ steps.apply.outputs.api_container_endpoint }}
             });
 
       - name: Report state (failure)
@@ -140,9 +179,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_OWNER: ${{ github.repository_owner }}
-          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
         with:
           path: ./infrastructure/envs/preview
           workspace: pr-${{ github.event.pull_request.number }}
@@ -153,6 +189,9 @@ jobs:
           variables: |
             gh_repo_name = "${{ github.event.repository.name }}"
             pr_number = "${{ github.event.pull_request.number }}"
+            scw_access_key = "${{ secrets.SCW_ACCESS_KEY }}"
+            scw_secret_key = "${{ secrets.SCW_SECRET_KEY }}"
+            scw_organization_id = "${{ secrets.SCW_ORGANIZATION_ID }}"
 
       - name: Report state (destroyed)
         uses: actions/github-script@v7

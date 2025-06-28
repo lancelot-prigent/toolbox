@@ -83,6 +83,7 @@ function generatePrStateComment(state, commitSha, prNumber)  {
 | **Status** | ${getStatusEmoji(state.deploy)} ${state.deploy || 'No state'} |
 | **Commit** | \`${commitSha.substring(0, 7)}\` |
 | **Updated** | ${new Date().toLocaleString()} |
+| **API Endpoint** | [${state.api_container_endpoint}](${state.api_container_endpoint}) |
 `
 }
 
