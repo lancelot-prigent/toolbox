@@ -26,4 +26,6 @@ module "api" {
 
   project_id   = module.scaleway_project.project_id
   project_name = local.project_name
+  env_name     = var.env_name
+  gh_repo_name = var.gh_repo_name
 }
