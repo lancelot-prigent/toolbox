@@ -68,6 +68,29 @@ async function persistPrState(github, context, state) {
   return JSON.parse(state);
 }
 
+function generatePrStateComment(state)  {
+  const stateString = `
+    <-- preview-state
+    ${JSON.stringify(state)}
+    -->
+  `;
+
+  switch (state?.deploy) {
+    case 'deploying':
+      return `${stateString}\n:yellow_circle: Deploying...`;
+    case 'deployed':
+      return `${stateString}\n:green_circle: Deployed!`;
+    case 'destroying':
+      return `${stateString}\n:yellow_circle: Destroying...`;
+    case 'destroyed':
+      return `${stateString}\n:green_circle: Destroyed!`;
+    case 'failure':
+      return `${stateString}\n:red_circle: Failed!`;
+    default:
+      return stateString;
+  }
+}
+
 module.exports = {
   getPrNumber,
   getPrLabels,
