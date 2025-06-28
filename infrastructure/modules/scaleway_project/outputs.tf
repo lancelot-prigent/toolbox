@@ -1,3 +1,3 @@
 output "project_id" {
-  value = scaleway_project.project.id
+  value = scaleway_account_project.project.id
 }
