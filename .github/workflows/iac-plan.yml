@@ -53,6 +53,9 @@ jobs:
             bucket=${{ github.event.repository.name }}-tofu-state
           variables: |
             gh_repo_name = "${{ github.event.repository.name }}"
+            scw_access_key = "${{ secrets.SCW_ACCESS_KEY }}"
+            scw_secret_key = "${{ secrets.SCW_SECRET_KEY }}"
+            scw_organization_id = "${{ secrets.SCW_ORGANIZATION_ID }}"
 
   environments:
     needs: core
