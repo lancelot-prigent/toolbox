@@ -33,12 +33,12 @@ async function getPrComments(github, context) {
  */
 async function getPrState(github, context) {
   const comments = await getPrComments(github, context);
-  const stateComment = comments.find(comment => comment.body?.includes('<-- preview-state'))
+  const stateComment = comments.find(comment => comment.body?.includes('<!-- preview-state'))
   
   if (!stateComment) return null;
   
-  const stateRegex = /<-- preview-state\n(.*)\n-->/;
-  const state = stateComment.body.match(stateRegex)[1];
+  const stateRegex = /<!-- preview-state (.*) -->/;
+  const state = stateComment.body.match(stateRegex)?.[1];
 
   return {
     commentId: stateComment.id,
@@ -71,9 +71,7 @@ async function persistPrState(github, context, state) {
 
 function generatePrStateComment(state)  {
   const stateString = `
-    <-- preview-state
-    ${JSON.stringify(state)}
-    -->
+    <!-- preview-state ${JSON.stringify(state)} -->
   `;
 
   switch (state?.deploy) {
