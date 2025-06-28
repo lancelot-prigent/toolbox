@@ -52,51 +52,51 @@ async function getPrState(github, context) {
 async function persistPrState(github, context, state) {
   const { state: previousState, commentId } = (await getPrState(github, context)) || {};
 
+  const body = generatePrStateComment(state, context.payload.pull_request.head.sha, context.payload.pull_request.number);
+  
   if (previousState) {
     await github.rest.issues.updateComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
       comment_id: commentId,
-      body: generatePrStateComment(state),
+      body,
     });
   } else {
     await github.rest.issues.createComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
       issue_number: context.payload.pull_request.number,
-      body: generatePrStateComment(state),
+      body,
     });
   }
 }
 
-function generatePrStateComment(state)  {
+function generatePrStateComment(state, commitSha, prNumber)  {
   const stateString = `<!-- preview-state ${JSON.stringify(state)} -->`;
-  let body = '';
-
-  switch (state?.deploy) {
-    case 'deploying':
-      body = `:yellow_circle: Deploying...`;
-      break;
-    case 'deployed':
-      body = `:green_circle: Deployed!`;
-      break;
-    case 'destroying':
-      body = `:yellow_circle: Destroying...`;
-      break;
-    case 'destroyed':
-      body = `:red_circle: Destroyed!`;
-      break;
-    case 'failure':
-      body = `:x: Failed!`;
-      break;
-    default:
-      body = `:white_circle: No state`;
-      break;
-  }
-
-  return `${stateString}\n\n${body}`;
+  
+  return `${stateString}
+🤖 **Preview Environment Status**
+  
+| Property | Value |
+|----------|-------|
+| **Environment** | \`pr-${prNumber}\` |
+| **Status** | ${getStatusEmoji(state.deploy)} ${state.deploy || 'No state'} |
+| **Commit** | \`${commitSha.substring(0, 7)}\` |
+| **Updated** | ${new Date().toLocaleString()} |
+`
 }
 
+function getStatusEmoji(status) {
+  const emojis = {
+    deploying: '🚀',
+    deployed: '✅',
+    destroying: '🧹',
+    destroyed: '💀',
+    failure: '❌'
+  };
+
+  return emojis[status] || '❓';
+}
 module.exports = {
   getPrNumber,
   getPrLabels,
