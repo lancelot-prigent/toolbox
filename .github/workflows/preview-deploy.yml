@@ -14,7 +14,6 @@ jobs:
     name: Determine actions
     runs-on: ubuntu-latest
     outputs:
-      should-apply: ${{ steps.check.outputs.should-apply }}
       should-destroy: ${{ steps.check.outputs.should-destroy }}
       should-deploy: ${{ steps.check.outputs.should-deploy }}
     steps:
@@ -28,11 +27,6 @@ jobs:
           script: |
             const scripts = require('./.github/scripts/preview-determine-actions.js');
             await scripts({ github, context, core });
-      - name: Debug
-        run: |
-          echo "should-deploy: ${{ steps.check.outputs.should-deploy }}"
-          echo "should-apply: ${{ steps.check.outputs.should-apply }}"
-          echo "should-destroy: ${{ steps.check.outputs.should-destroy }}"
 
   deploy:
     name: Deploy preview
@@ -60,6 +54,16 @@ jobs:
           repositories: ${{ github.event.repository.name }}
           app-id: ${{ vars.TOFU_MANAGER_CLIENT_ID }}
           private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
+
+      - name: Create tofu workspace
+        uses: dflook/tofu-new-workspace@v2.1.0
+        with:
+          path: ./infrastructure/envs/preview
+          workspace: pr-${{ github.event.pull_request.number }}
+          backend_config: |
+            access_key=${{ secrets.SCW_ACCESS_KEY }}
+            secret_key=${{ secrets.SCW_SECRET_KEY }}
+            bucket=${{ github.event.repository.name }}-tofu-state
 
       - name: Apply Tofu plan
         uses: dflook/tofu-apply@v2.1.0
@@ -132,7 +136,6 @@ jobs:
           private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
 
       - name: Destroy Tofu plan
-        if: fromJSON(needs.determine-actions.outputs.should-apply)
         uses: dflook/tofu-destroy@v2.1.0
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -150,6 +153,16 @@ jobs:
           variables: |
             gh_repo_name = "${{ github.event.repository.name }}"
             pr_number = "${{ github.event.pull_request.number }}"
+
+      - name: Delete tofu workspace
+        uses: dflook/tofu-destroy-workspace@v2.1.0
+        with:
+          path: ./infrastructure/envs/preview
+          workspace: pr-${{ github.event.pull_request.number }}
+          backend_config: |
+            access_key=${{ secrets.SCW_ACCESS_KEY }}
+            secret_key=${{ secrets.SCW_SECRET_KEY }}
+            bucket=${{ github.event.repository.name }}-tofu-state
 
       - name: Report state (destroyed)
         uses: actions/github-script@v7
