@@ -38,13 +38,3 @@ variable "gh_pat_token" {
     error_message = "GitHub personal access token must be provided"
   }
 }
-
-variable "gh_owner" {
-  type        = string
-  description = "GitHub owner"
-
-  validation {
-    condition     = length(var.gh_owner) > 0
-    error_message = "GitHub owner must be provided"
-  }
-}
