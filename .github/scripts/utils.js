@@ -70,9 +70,7 @@ async function persistPrState(github, context, state) {
 }
 
 function generatePrStateComment(state)  {
-  const stateString = `
-    <!-- preview-state ${JSON.stringify(state)} -->
-  `;
+  const stateString = `<!-- preview-state ${JSON.stringify(state)} -->`;
 
   switch (state?.deploy) {
     case 'deploying':
