@@ -7,6 +7,9 @@ async function getPrNumber(context) {
   return prNumber;
 }
 
+/**
+ * @returns {Promise<string[]>}
+ */
 async function getPrLabels(context) {
   const labels = context.payload.pull_request.labels.map(label => label.name);
   return labels;
