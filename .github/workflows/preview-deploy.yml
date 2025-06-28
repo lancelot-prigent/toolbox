@@ -39,10 +39,10 @@ jobs:
           echo "should-destroy: ${{ steps.check.outputs.should-destroy }}"
 
   deploy:
-    name: Deploy
+    name: Deploy preview
     runs-on: ubuntu-latest
     needs: determine-actions
-    if: needs.determine-actions.outputs.should-deploy == true
+    if: fromJSON(needs.determine-actions.outputs.should-deploy)
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,12 +57,12 @@ jobs:
             });
 
       - name: Apply Tofu
-        if: needs.determine-actions.outputs.should-apply == true
+        if: fromJSON(needs.determine-actions.outputs.should-apply)
         run: |
           echo "Applying Tofu"
 
       - name: Deploy application
-        if: needs.determine-actions.outputs.should-deploy == true
+        if: fromJSON(needs.determine-actions.outputs.should-deploy)
         run: |
           echo "Deploying application"
 
@@ -86,10 +86,10 @@ jobs:
             });
 
   cleanup:
-    name: Clean up
+    name: Clean up preview
     runs-on: ubuntu-latest
     needs: determine-actions
-    if: needs.determine-actions.outputs.should-destroy == true
+    if: fromJSON(needs.determine-actions.outputs.should-destroy)
     steps:
       - name: Checkout
         uses: actions/checkout@v4
