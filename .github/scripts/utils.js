@@ -30,19 +30,21 @@ async function getPrState(github, context) {
   const stateComment = await getPrStateComment(github, context);
   const stateRegex = /<-- preview-state\n(.*)\n-->/;
   const state = stateComment.body.match(stateRegex)[1];
-  return JSON.parse(state);
+
+  return {
+    commentId: stateComment.id,
+    state: JSON.parse(state),
+  };
 }
 
 async function persistPrState(github, context, state) {
-  const stateComment = await getPrStateComment(github, context);
-  const stateRegex = /<-- preview-state\n(.*)\n-->/;
-  const state = stateComment.body.match(stateRegex)[1];
+  const { state: previousState, commentId } = await getPrState(github, context);
 
-  if (stateComment) {
+  if (previousState) {
     await github.rest.issues.updateComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
-      comment_id: stateComment.id,
+      comment_id: commentId,
       body: `<-- preview-state\n${JSON.stringify(state)}\n-->`,
     });
   } else {
