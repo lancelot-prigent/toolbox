@@ -8,9 +8,7 @@ module.exports = async ({ github, context, core }) => {
   const shouldApply = !state && shouldDeploy;
   const shouldDestroy = !!state && !shouldDeploy;
 
-  console.log({ state, shouldDeploy, shouldApply, shouldDestroy });
-
-  core.setOutput('shouldApply', shouldApply);
-  core.setOutput('shouldDestroy', shouldDestroy);
-  core.setOutput('shouldDeploy', shouldDeploy);
+  core.setOutput('should-apply', shouldApply);
+  core.setOutput('should-destroy', shouldDestroy);
+  core.setOutput('should-deploy', shouldDeploy);
 }
