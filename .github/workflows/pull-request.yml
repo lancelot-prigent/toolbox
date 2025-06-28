@@ -107,9 +107,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_OWNER: ${{ github.repository_owner }}
-          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
         with:
           path: ./infrastructure/envs/preview
           label: preview
@@ -122,6 +119,9 @@ jobs:
           variables: |
             gh_repo_name = "${{ github.event.repository.name }}"
             pr_number = "${{ github.event.pull_request.number }}"
+            scw_access_key = "${{ secrets.SCW_ACCESS_KEY }}"
+            scw_secret_key = "${{ secrets.SCW_SECRET_KEY }}"
+            scw_organization_id = "${{ secrets.SCW_ORGANIZATION_ID }}"
 
       - name: Deploy application
         run: |
@@ -177,9 +177,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_OWNER: ${{ github.repository_owner }}
-          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
         with:
           path: ./infrastructure/envs/preview
           workspace: pr-${{ github.event.pull_request.number }}
@@ -190,6 +187,9 @@ jobs:
           variables: |
             gh_repo_name = "${{ github.event.repository.name }}"
             pr_number = "${{ github.event.pull_request.number }}"
+            scw_access_key = "${{ secrets.SCW_ACCESS_KEY }}"
+            scw_secret_key = "${{ secrets.SCW_SECRET_KEY }}"
+            scw_organization_id = "${{ secrets.SCW_ORGANIZATION_ID }}"
 
       - name: Report state (destroyed)
         uses: actions/github-script@v7

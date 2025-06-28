@@ -12,13 +12,19 @@ locals {
 module "scaleway_project" {
   source = "../scaleway_project"
 
-  project_name = local.project_name
+  project_name        = local.project_name
+  scw_access_key      = var.scw_access_key
+  scw_secret_key      = var.scw_secret_key
+  scw_organization_id = var.scw_organization_id
 }
 
 provider "scaleway" {
-  zone       = "fr-par-2"
-  region     = "fr-par"
-  project_id = module.scaleway_project.project_id
+  zone            = "fr-par-2"
+  region          = "fr-par"
+  project_id      = module.scaleway_project.project_id
+  access_key      = var.scw_access_key
+  secret_key      = var.scw_secret_key
+  organization_id = var.scw_organization_id
 }
 
 module "api" {
