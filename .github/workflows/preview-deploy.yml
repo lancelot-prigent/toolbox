@@ -56,10 +56,23 @@ jobs:
               deploy: 'deploying'
             });
 
-      - name: Apply Tofu
+      - name: Apply Tofu plan
         if: fromJSON(needs.determine-actions.outputs.should-apply)
-        run: |
-          echo "Applying Tofu"
+        uses: dflook/tofu-apply@v2.1.0
+        with:
+          path: ./infrastructure/envs/preview
+          label: preview
+          auto_approve: true
+          workspace: pr-${{ github.event.pull_request.number }}
+          backend_config: |
+            access_key=${{ secrets.SCW_ACCESS_KEY }}
+            secret_key=${{ secrets.SCW_SECRET_KEY }}
+            bucket=${{ github.event.repository.name }}-tofu-state
+          variables: |
+            gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
+            gh_owner = "${{ github.repository_owner }}"
+            gh_repo_name = "${{ github.event.repository.name }}"
+            pr_number = "${{ github.event.pull_request.number }}"
 
       - name: Deploy application
         if: fromJSON(needs.determine-actions.outputs.should-deploy)
@@ -103,9 +116,21 @@ jobs:
               deploy: 'destroying'
             });
 
-      - name: Destroy Tofu
-        run: |
-          echo "Destroying Tofu"
+      - name: Apply Tofu plan
+        if: fromJSON(needs.determine-actions.outputs.should-apply)
+        uses: dflook/tofu-destroy@v2.1.0
+        with:
+          path: ./infrastructure/envs/preview
+          workspace: pr-${{ github.event.pull_request.number }}
+          backend_config: |
+            access_key=${{ secrets.SCW_ACCESS_KEY }}
+            secret_key=${{ secrets.SCW_SECRET_KEY }}
+            bucket=${{ github.event.repository.name }}-tofu-state
+          variables: |
+            gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
+            gh_owner = "${{ github.repository_owner }}"
+            gh_repo_name = "${{ github.event.repository.name }}"
+            pr_number = "${{ github.event.pull_request.number }}"
 
       - name: Report state (destroyed)
         uses: actions/github-script@v7
