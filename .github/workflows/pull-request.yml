@@ -104,6 +104,7 @@ jobs:
 
       - name: Apply Tofu plan
         uses: dflook/tofu-apply@v2.1.0
+        id: apply
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_OWNER: ${{ github.repository_owner }}
@@ -133,7 +134,8 @@ jobs:
           script: |
             const scripts = require('./.github/scripts/report-state.js');
             await scripts({ github, context, core }, {
-              deploy: 'deployed'
+              deploy: 'deployed',
+              api_container_endpoint: ${{ steps.apply.outputs.api_container_endpoint }}
             });
 
       - name: Report state (failure)
