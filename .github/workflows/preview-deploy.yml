@@ -14,7 +14,6 @@ jobs:
     name: Determine actions
     runs-on: ubuntu-latest
     outputs:
-      should-apply: ${{ steps.check.outputs.should-apply }}
       should-destroy: ${{ steps.check.outputs.should-destroy }}
       should-deploy: ${{ steps.check.outputs.should-deploy }}
     steps:
@@ -28,11 +27,6 @@ jobs:
           script: |
             const scripts = require('./.github/scripts/preview-determine-actions.js');
             await scripts({ github, context, core });
-      - name: Debug
-        run: |
-          echo "should-deploy: ${{ steps.check.outputs.should-deploy }}"
-          echo "should-apply: ${{ steps.check.outputs.should-apply }}"
-          echo "should-destroy: ${{ steps.check.outputs.should-destroy }}"
 
   deploy:
     name: Deploy preview
@@ -132,7 +126,6 @@ jobs:
           private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
 
       - name: Destroy Tofu plan
-        if: fromJSON(needs.determine-actions.outputs.should-apply)
         uses: dflook/tofu-destroy@v2.1.0
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
