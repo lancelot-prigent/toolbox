@@ -67,8 +67,6 @@ async function persistPrState(github, context, state) {
       body: generatePrStateComment(state),
     });
   }
-  
-  return JSON.parse(state);
 }
 
 function generatePrStateComment(state)  {
