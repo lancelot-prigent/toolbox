@@ -9,14 +9,13 @@ async function getPrLabels(context) {
 }
 
 async function getPrComments(github, context) {
-  const comments = await github.rest.issues.listComments({
+  const res = await github.rest.issues.listComments({
     owner: context.repo.owner,
     repo: context.repo.repo,
     issue_number: context.payload.pull_request.number,
   });
 
-  console.log(comments)
-  return comments;
+  return res.data;
 }
 
 async function getPrStateComment(github, context) {
