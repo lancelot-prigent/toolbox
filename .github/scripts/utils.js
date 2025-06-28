@@ -15,11 +15,11 @@ async function getPrComments(github, context) {
     issue_number: context.payload.pull_request.number,
   });
 
+  console.log(comments)
   return comments;
 }
 
 async function getPrStateComment(github, context) {
-  const prNumber = getPrNumber(context);
   const comments = await getPrComments(github, context);
   const stateComment = comments.find(comment => comment.body.includes('<-- preview-state'))
 
