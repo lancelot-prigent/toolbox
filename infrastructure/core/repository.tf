@@ -71,6 +71,12 @@ resource "github_repository_ruleset" "default_branch" {
     }
   }
 
+  bypass_actors {
+    actor_type  = "OrganizationAdmin"
+    bypass_mode = "pull_request"
+    actor_id    = 1
+  }
+
   rules {
     deletion         = true
     non_fast_forward = true
