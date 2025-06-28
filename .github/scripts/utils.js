@@ -57,14 +57,14 @@ async function persistPrState(github, context, state) {
       owner: context.repo.owner,
       repo: context.repo.repo,
       comment_id: commentId,
-      body: `<-- preview-state\n${JSON.stringify(state)}\n-->`,
+      body: generatePrStateComment(state),
     });
   } else {
     await github.rest.issues.createComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
       issue_number: context.payload.pull_request.number,
-      body: `<-- preview-state\n${JSON.stringify(state)}\n-->`,
+      body: generatePrStateComment(state),
     });
   }
   
