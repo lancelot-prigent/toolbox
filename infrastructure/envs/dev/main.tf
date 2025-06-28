@@ -1,6 +1,6 @@
 module "environment" {
   source = "../../modules/environment"
 
-  env_name     = "pr-43"
+  env_name     = "dev"
   gh_repo_name = var.gh_repo_name
 }
