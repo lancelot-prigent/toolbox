@@ -7,13 +7,6 @@ on:
     paths:
       - "infrastructure/**"
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GH_PAT_TOKEN }}
-  GITHUB_OWNER: ${{ github.repository_owner }}
-  SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-  SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-  SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-
 jobs:
   fmt-check:
     name: Check formatting
@@ -35,8 +28,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          app-id: ${{ vars.TOFU_MANAGER_CLIENT_ID }}
+          private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
+
       - name: Create tofu plan for core
         uses: dflook/tofu-plan@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
         with:
           path: ./infrastructure/core
           label: Core
@@ -61,8 +68,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          app-id: ${{ vars.TOFU_MANAGER_CLIENT_ID }}
+          private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
+
       - name: Create tofu plan for ${{ matrix.environment }}
         uses: dflook/tofu-plan@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
         with:
           path: ./infrastructure/envs/${{ matrix.environment }}
           label: ${{ matrix.environment }}
