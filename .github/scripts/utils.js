@@ -50,7 +50,7 @@ async function getPrState(github, context) {
  * @param {GitHub} github
  */
 async function persistPrState(github, context, state) {
-  const { state: previousState, commentId } = await getPrState(github, context);
+  const { state: previousState, commentId } = (await getPrState(github, context)) || {};
 
   if (previousState) {
     await github.rest.issues.updateComment({
