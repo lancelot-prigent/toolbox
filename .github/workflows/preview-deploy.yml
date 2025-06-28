@@ -14,7 +14,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  check-labels:
+  determine-actions:
+    name: Determine actions
     runs-on: ubuntu-latest
     outputs:
       should-apply: ${{ steps.check.outputs.should-apply }}
@@ -36,3 +37,91 @@ jobs:
           echo "should-deploy: ${{ steps.check.outputs.should-deploy }}"
           echo "should-apply: ${{ steps.check.outputs.should-apply }}"
           echo "should-destroy: ${{ steps.check.outputs.should-destroy }}"
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: determine-actions
+    if: needs.determine-actions.outputs.should-deploy == true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Report state (deploying)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'deploying'
+            });
+
+      - name: Apply Tofu
+        if: needs.determine-actions.outputs.should-apply == true
+        run: |
+          echo "Applying Tofu"
+
+      - name: Deploy application
+        if: needs.determine-actions.outputs.should-deploy == true
+        run: |
+          echo "Deploying application"
+
+      - name: Report state (deployed)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'deployed'
+            });
+
+      - name: Report state (failure)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'failure'
+            });
+
+  cleanup:
+    name: Clean up
+    runs-on: ubuntu-latest
+    needs: determine-actions
+    if: needs.determine-actions.outputs.should-destroy == true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Report state (destroying)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'destroying'
+            });
+
+      - name: Destroy Tofu
+        run: |
+          echo "Destroying Tofu"
+
+      - name: Report state (destroyed)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'destroyed'
+            });
+
+      - name: Report state (failure)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'failure'
+            });
