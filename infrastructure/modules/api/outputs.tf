@@ -1,3 +1,3 @@
-output "api_container_namespace_registry_endpoint" {
-  value = scaleway_container_namespace.api.registry_endpoint
+output "api_container_endpoint" {
+  value = scaleway_container.api.domain_name
 }
