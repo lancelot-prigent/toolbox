@@ -12,9 +12,9 @@ variable "env_name" {
       var.env_name == "dev",
       var.env_name == "staging",
       var.env_name == "prod",
-      startswith(var.env_name, "preview-")
+      startswith(var.env_name, "pr-")
     ])
-    error_message = "Environment name must be one of: dev, staging, prod, preview-<number>"
+    error_message = "Environment name must be one of: dev, staging, prod, pr-<number>"
   }
 }
 
