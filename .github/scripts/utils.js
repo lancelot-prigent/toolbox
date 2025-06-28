@@ -71,21 +71,30 @@ async function persistPrState(github, context, state) {
 
 function generatePrStateComment(state)  {
   const stateString = `<!-- preview-state ${JSON.stringify(state)} -->`;
+  let body = '';
 
   switch (state?.deploy) {
     case 'deploying':
-      return `${stateString}\n:yellow_circle: Deploying...`;
+      body = `:yellow_circle: Deploying...`;
+      break;
     case 'deployed':
-      return `${stateString}\n:green_circle: Deployed!`;
+      body = `:green_circle: Deployed!`;
+      break;
     case 'destroying':
-      return `${stateString}\n:yellow_circle: Destroying...`;
+      body = `:yellow_circle: Destroying...`;
+      break;
     case 'destroyed':
-      return `${stateString}\n:green_circle: Destroyed!`;
+      body = `:red_circle: Destroyed!`;
+      break;
     case 'failure':
-      return `${stateString}\n:red_circle: Failed!`;
+      body = `:x: Failed!`;
+      break;
     default:
-      return stateString;
+      body = `:white_circle: No state`;
+      break;
   }
+
+  return `${stateString}\n\n${body}`;
 }
 
 module.exports = {
