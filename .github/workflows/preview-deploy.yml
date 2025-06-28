@@ -55,6 +55,8 @@ jobs:
       - uses: actions/create-github-app-token@v2
         id: app-token
         with:
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
           app-id: ${{ vars.TOFU_MANAGER_APP_ID }}
           private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
 
@@ -123,6 +125,8 @@ jobs:
       - uses: actions/create-github-app-token@v2
         id: app-token
         with:
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
           app-id: ${{ vars.TOFU_MANAGER_APP_ID }}
           private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
 
