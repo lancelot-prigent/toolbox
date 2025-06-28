@@ -7,16 +7,6 @@ on:
     paths:
       - "infrastructure/**"
 
-permissions:
-  contents: read
-  pull-requests: write
-
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
-  SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
-  SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-
 jobs:
   core:
     name: Apply core changes
@@ -25,8 +15,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          app-id: ${{ vars.TOFU_MANAGER_CLIENT_ID }}
+          private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
+
       - name: Apply core changes
         uses: dflook/tofu-apply@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
         with:
           path: ./infrastructure/core
           label: Core
@@ -35,34 +39,44 @@ jobs:
             secret_key=${{ secrets.SCW_SECRET_KEY }}
             bucket=${{ github.event.repository.name }}-tofu-state
           variables: |
-            gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
-            gh_owner = "${{ github.repository_owner }}"
             gh_repo_name = "${{ github.event.repository.name }}"
 
-  # environments:
-  #   needs: core
-  #   name: Apply environments changes
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       environment:
-  #         - dev
-  #         - staging
-  #         - prod
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+  environments:
+    needs: core
+    name: Apply environments changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment:
+          - dev
+          - staging
+          - prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #     - name: Apply ${{ matrix.environment }} changes
-  #       uses: dflook/tofu-apply@v2.1.0
-  #       with:
-  #         path: ./infrastructure/envs/${{ matrix.environment }}
-  #         label: ${{ matrix.environment }}
-  #         backend_config: |
-  #           access_key=${{ secrets.SCW_ACCESS_KEY }}
-  #           secret_key=${{ secrets.SCW_SECRET_KEY }}
-  #           bucket=${{ github.event.repository.name }}-tofu-state
-  #         variables: |
-  #           gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
-  #           gh_owner = "${{ github.repository_owner }}"
-  #           gh_repo_name = "${{ github.event.repository.name }}"
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          app-id: ${{ vars.TOFU_MANAGER_CLIENT_ID }}
+          private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
+
+      - name: Apply ${{ matrix.environment }} changes
+        uses: dflook/tofu-apply@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+        with:
+          path: ./infrastructure/envs/${{ matrix.environment }}
+          label: ${{ matrix.environment }}
+          backend_config: |
+            access_key=${{ secrets.SCW_ACCESS_KEY }}
+            secret_key=${{ secrets.SCW_SECRET_KEY }}
+            bucket=${{ github.event.repository.name }}-tofu-state
+          variables: |
+            gh_repo_name = "${{ github.event.repository.name }}"

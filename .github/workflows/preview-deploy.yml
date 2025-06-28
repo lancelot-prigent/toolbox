@@ -1,0 +1,171 @@
+name: Preview - Deploy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled, closed]
+    branches: [main]
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  determine-actions:
+    name: Determine actions
+    runs-on: ubuntu-latest
+    outputs:
+      should-apply: ${{ steps.check.outputs.should-apply }}
+      should-destroy: ${{ steps.check.outputs.should-destroy }}
+      should-deploy: ${{ steps.check.outputs.should-deploy }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine actions
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/preview-determine-actions.js');
+            await scripts({ github, context, core });
+      - name: Debug
+        run: |
+          echo "should-deploy: ${{ steps.check.outputs.should-deploy }}"
+          echo "should-apply: ${{ steps.check.outputs.should-apply }}"
+          echo "should-destroy: ${{ steps.check.outputs.should-destroy }}"
+
+  deploy:
+    name: Deploy preview
+    runs-on: ubuntu-latest
+    needs: determine-actions
+    if: fromJSON(needs.determine-actions.outputs.should-deploy)
+    environment: pr-${{ github.event.pull_request.number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Report state (deploying)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'deploying'
+            });
+
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          app-id: ${{ vars.TOFU_MANAGER_CLIENT_ID }}
+          private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
+
+      - name: Apply Tofu plan
+        uses: dflook/tofu-apply@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+        with:
+          path: ./infrastructure/envs/preview
+          label: preview
+          auto_approve: true
+          workspace: pr-${{ github.event.pull_request.number }}
+          backend_config: |
+            access_key=${{ secrets.SCW_ACCESS_KEY }}
+            secret_key=${{ secrets.SCW_SECRET_KEY }}
+            bucket=${{ github.event.repository.name }}-tofu-state
+          variables: |
+            gh_repo_name = "${{ github.event.repository.name }}"
+            pr_number = "${{ github.event.pull_request.number }}"
+
+      - name: Deploy application
+        run: |
+          echo "Deploying application"
+
+      - name: Report state (deployed)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'deployed'
+            });
+
+      - name: Report state (failure)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'failure'
+            });
+
+  cleanup:
+    name: Clean up preview
+    runs-on: ubuntu-latest
+    needs: determine-actions
+    if: fromJSON(needs.determine-actions.outputs.should-destroy)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Report state (destroying)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'destroying'
+            });
+
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          app-id: ${{ vars.TOFU_MANAGER_CLIENT_ID }}
+          private-key: ${{ secrets.TOFU_MANAGER_APP_SECRET }}
+
+      - name: Destroy Tofu plan
+        if: fromJSON(needs.determine-actions.outputs.should-apply)
+        uses: dflook/tofu-destroy@v2.1.0
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+        with:
+          path: ./infrastructure/envs/preview
+          workspace: pr-${{ github.event.pull_request.number }}
+          backend_config: |
+            access_key=${{ secrets.SCW_ACCESS_KEY }}
+            secret_key=${{ secrets.SCW_SECRET_KEY }}
+            bucket=${{ github.event.repository.name }}-tofu-state
+          variables: |
+            gh_repo_name = "${{ github.event.repository.name }}"
+            pr_number = "${{ github.event.pull_request.number }}"
+
+      - name: Report state (destroyed)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'destroyed'
+            });
+
+      - name: Report state (failure)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const scripts = require('./.github/scripts/report-state.js');
+            await scripts({ github, context, core }, {
+              deploy: 'failure'
+            });
