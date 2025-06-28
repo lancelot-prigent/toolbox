@@ -3,6 +3,6 @@ provider "scaleway" {
   region = "fr-par"
 }
 
-resource "scaleway_project" "project" {
+resource "scaleway_account_project" "project" {
   name = var.project_name
 }
