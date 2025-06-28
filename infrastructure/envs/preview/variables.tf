@@ -4,11 +4,6 @@ variable "gh_pat_token" {
   sensitive   = true
 }
 
-variable "gh_owner" {
-  type        = string
-  description = "GitHub owner"
-}
-
 variable "gh_repo_name" {
   type        = string
   description = "GitHub repository name"
