@@ -28,18 +28,12 @@ async function getPrComments(github, context) {
 /**
  * @param {GitHub} github
  */
-async function getPrStateComment(github, context) {
-  const comments = await getPrComments(github, context);
-  console.log('getPrStateComment -> comments', comments);
-  const stateComment = comments.find(comment => comment.body?.includes('<-- preview-state'))
-  return stateComment || null;
-}
-
-/**
- * @param {GitHub} github
- */
 async function getPrState(github, context) {
-  const stateComment = await getPrStateComment(github, context);
+  const comments = await getPrComments(github, context);
+  const stateComment = comments.find(comment => comment.body?.includes('<-- preview-state'))
+  
+  if (!stateComment) return null;
+  
   const stateRegex = /<-- preview-state\n(.*)\n-->/;
   const state = stateComment.body.match(stateRegex)[1];
 
@@ -78,7 +72,6 @@ module.exports = {
   getPrNumber,
   getPrLabels,
   getPrComments,
-  getPrStateComment,
   getPrState,
   persistPrState,
 };
