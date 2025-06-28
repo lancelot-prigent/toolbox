@@ -7,12 +7,8 @@ on:
     paths:
       - "infrastructure/**"
 
-permissions:
-  contents: read
-  pull-requests: write
-
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GH_PAT_TOKEN }}
   GITHUB_OWNER: ${{ github.repository_owner }}
   SCW_ACCESS_KEY: ${{ secrets.SCW_ACCESS_KEY }}
   SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
@@ -36,7 +32,6 @@ jobs:
             secret_key=${{ secrets.SCW_SECRET_KEY }}
             bucket=${{ github.event.repository.name }}-tofu-state
           variables: |
-            gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
             gh_repo_name = "${{ github.event.repository.name }}"
 
   environments:
@@ -63,5 +58,4 @@ jobs:
             secret_key=${{ secrets.SCW_SECRET_KEY }}
             bucket=${{ github.event.repository.name }}-tofu-state
           variables: |
-            gh_pat_token = "${{ secrets.GH_PAT_TOKEN }}"
             gh_repo_name = "${{ github.event.repository.name }}"

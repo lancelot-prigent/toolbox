@@ -1,8 +1,6 @@
 # provider "scaleway" {}
 
-provider "github" {
-  token = var.gh_pat_token
-}
+provider "github" {}
 
 
 module "github_env" {
