@@ -1,3 +1,7 @@
+/**
+ * @typedef {import('octokit').Octokit} GitHub
+ */
+
 async function getPrNumber(context) {
   const prNumber = context.payload.pull_request.number;
   return prNumber;
@@ -8,6 +12,9 @@ async function getPrLabels(context) {
   return labels;
 }
 
+/**
+ * @param {GitHub} github
+ */
 async function getPrComments(github, context) {
   const res = await github.rest.issues.listComments({
     owner: context.repo.owner,
@@ -15,18 +22,22 @@ async function getPrComments(github, context) {
     issue_number: context.payload.pull_request.number,
   });
 
-  console.log(res, res.data);
   return res.data;
 }
 
+/**
+ * @param {GitHub} github
+ */
 async function getPrStateComment(github, context) {
   const comments = await getPrComments(github, context);
-  console.log(comments);
-  const stateComment = comments.find(comment => comment.body.includes('<-- preview-state'))
-
-  return stateComment;
+  console.log('getPrStateComment -> comments', comments);
+  const stateComment = comments.find(comment => comment.body?.includes('<-- preview-state'))
+  return stateComment || null;
 }
 
+/**
+ * @param {GitHub} github
+ */
 async function getPrState(github, context) {
   const stateComment = await getPrStateComment(github, context);
   const stateRegex = /<-- preview-state\n(.*)\n-->/;
@@ -38,6 +49,9 @@ async function getPrState(github, context) {
   };
 }
 
+/**
+ * @param {GitHub} github
+ */
 async function persistPrState(github, context, state) {
   const { state: previousState, commentId } = await getPrState(github, context);
 
